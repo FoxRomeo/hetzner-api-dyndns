@@ -205,7 +205,7 @@ logger Info "Currently set IP address: ${cur_dyn_addr}"
         if [[ $? != 0 ]]; then
           logger Error "Unable to recreate record: \"${record_name}\""
         else
-          logger Info "DNS record \"${record_name}\" updated successfully"
+          logger Info "DNS record \"${record_name}\" recreated successfully"
         fi
       fi
     fi
