@@ -166,7 +166,7 @@ logger Info "Currently set IP address: ${cur_dyn_addr}"
     else
       logger Info "DNS record \"${record_name}\" is no longer valid - updating record" 
       # update record
-      if (( $(grep -c . <<<"${record_name}") == "1" )); then
+      if (( $(grep -c . <<<"${record_id}") == "1" )); then
         curl -s -X "PUT" "https://dns.hetzner.com/api/v1/records/${record_id}" \
            -H 'Content-Type: application/json' \
            -H 'Auth-API-Token: '${auth_api_token} \
