@@ -161,52 +161,51 @@ logger Info "Currently set IP address: ${cur_dyn_addr}"
 
 # update existing record
     if [[ $cur_pub_addr == $cur_dyn_addr ]]; then
-        logger Info "DNS record \"${record_name}\" is up to date - nothing to to."
-        exit 0
+      logger Info "DNS record \"${record_name}\" is up to date - nothing to to."
+      exit 0
     else
-        logger Info "DNS record \"${record_name}\" is no longer valid - updating record" 
-        # update record
-#        curl -s -X "PUT" "https://dns.hetzner.com/api/v1/records/${record_id}" \
-#             -H 'Content-Type: application/json' \
-#             -H 'Auth-API-Token: '${auth_api_token} \
-#             -d $'{
-#               "value": "'${cur_pub_addr}'",
-#               "ttl": '${record_ttl}',
-#               "type": "'${record_type}'",
-#               "name": "'${record_name}'",
-#               "zone_id": "'${zone_id}'"
-#             }'
-#        if [[ $? != 0 ]]; then
-#            logger Error "Unable to update record: \"${record_name}\""
-#            logger Info "Retry delete/create instead of update"
-            # delete record
-            while [[ "${record_id}" != "" ]]; do
-              curl -s -X "DELETE" "https://dns.hetzner.com/api/v1/records/${record_id}" \
-                 -H 'Content-Type: application/json' \
-                 -H 'Auth-API-Token: '${auth_api_token}
-              record_id=$(curl -s --location \
-                   --request GET 'https://dns.hetzner.com/api/v1/records?zone_id='${zone_id} \
-                   --header 'Auth-API-Token: '${auth_api_token} | \
-                   jq --raw-output '.records[] | select(.type == "'${record_type}'") | select(.name == "'${record_name}'") | .id')
-            done
-            # create record
-            curl -s -X "POST" "https://dns.hetzner.com/api/v1/records" \
+      logger Info "DNS record \"${record_name}\" is no longer valid - updating record" 
+      # update record
+      if (( $(grep -c . <<<"${record_name}") = 1 )); then
+        curl -s -X "PUT" "https://dns.hetzner.com/api/v1/records/${record_id}" \
+           -H 'Content-Type: application/json' \
+           -H 'Auth-API-Token: '${auth_api_token} \
+           -d $'{
+             "value": "'${cur_pub_addr}'",
+             "ttl": '${record_ttl}',
+             "type": "'${record_type}'",
+             "name": "'${record_name}'",
+             "zone_id": "'${zone_id}'"
+           }'
+        if [[ $? != 0 ]]; then
+          logger Error "Unable to update record: \"${record_name}\""
+        else
+          logger Info "DNS record \"${record_name}\" updated successfully"
+        fi
+      else
+        logger Info "Retry delete/create instead of update"
+        # delete records
+        for r_id in ${record_id}; do
+          curl -s -X "DELETE" "https://dns.hetzner.com/api/v1/records/${record_id}" \
                -H 'Content-Type: application/json' \
-               -H 'Auth-API-Token: '${auth_api_token} \
-               -d $'{
-                 "value": "'${cur_pub_addr}'",
-                 "ttl": '${record_ttl}',
-                 "type": "'${record_type}'",
-                 "name": "'${record_name}'",
-                 "zone_id": "'${zone_id}'"
-               }'
-            if [[ $? != 0 ]]; then
-              logger Error "Unable to recreate record: \"${record_name}\""
-            else
-              logger Info "DNS record \"${record_name}\" updated successfully"
-            fi
-#        else
-#            logger Info "DNS record \"${record_name}\" updated successfully"
-#        fi
+               -H 'Auth-API-Token: '${auth_api_token}
+        done
+        # create record
+        curl -s -X "POST" "https://dns.hetzner.com/api/v1/records" \
+           -H 'Content-Type: application/json' \
+           -H 'Auth-API-Token: '${auth_api_token} \
+           -d $'{
+               "value": "'${cur_pub_addr}'",
+               "ttl": '${record_ttl}',
+               "type": "'${record_type}'",
+               "name": "'${record_name}'",
+               "zone_id": "'${zone_id}'"
+           }'
+        if [[ $? != 0 ]]; then
+          logger Error "Unable to recreate record: \"${record_name}\""
+        else
+          logger Info "DNS record \"${record_name}\" updated successfully"
+        fi
+      fi
     fi
 fi
