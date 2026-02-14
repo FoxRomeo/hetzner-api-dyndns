@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 # DynDNS Script for Hetzner DNS API by FarrowStrange
 # modified by FoxRomeo
-# v1.2
+# v1.3.1
 
 # get OS environment variables
 auth_api_token=${HETZNER_AUTH_API_TOKEN:-''}
@@ -32,7 +32,8 @@ help:
   -h  - Show Help 
 
 requirements:
-curl, dig, jq and awk are required to run this script.
+curl
+jq
 
 example:
   .exec: ./dyndns.sh -z 98jFjsd8dh1GHasdf7a8hJG7 -r AHD82h347fGAF1 -n dyn
@@ -61,7 +62,7 @@ while getopts ":z:Z:r:n:t:T:h" opt; do
 done
 
 # Check if tools are installed
-for cmd in curl dig jq awk; do
+for cmd in curl jq; do
   if ! command -v "${cmd}" &> /dev/null; then
     logger Error "To run the script '${cmd}' is needed, but it seems not to be installed."
     logger Error "Please check 'https://github.com/FarrowStrange/hetzner-api-dyndns#install-tools' for more informations and try again."
@@ -76,9 +77,12 @@ if [[ "${auth_api_token}" = "" ]]; then
 fi
 
 # get all zones
+#zone_info=$(curl -s --location \
+#          "https://dns.hetzner.com/api/v1/zones" \
+#          --header 'Auth-API-Token: '${auth_api_token})
 zone_info=$(curl -s --location \
-          "https://dns.hetzner.com/api/v1/zones" \
-          --header 'Auth-API-Token: '${auth_api_token})
+          "https://api.hetzner.cloud/v1/zones" \
+          --header 'Authorization: Bearer '${auth_api_token})
 
 # check if either zone_id or zone_name is correct
 if [[ "$(echo ${zone_info} | jq --raw-output '.zones[] | select(.name=="'${zone_name}'") | .id')" = "" && "$(echo ${zone_info} | jq --raw-output '.zones[] | select(.id=="'${zone_id}'") | .name')" = "" ]]; then
@@ -110,7 +114,8 @@ fi
 # get current public ip address
 if [[ "${record_type}" = "AAAA" ]]; then
   logger Info "Using IPv6, because AAAA was set as record type."
-  cur_pub_addr=$(dig -6 ch TXT +short whoami.cloudflare @2606:4700:4700::1111 | awk -F '"' '{print $2}')
+#  cur_pub_addr=$(dig -6 ch TXT +short whoami.cloudflare @2606:4700:4700::1111 | awk -F '"' '{print $2}')
+  cur_pub_addr=$(curl -s6 https://ip.hetzner.com | grep -E '^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}$')
   if [[ "${cur_pub_addr}" = "" ]]; then
     logger Error "It seems you don't have a IPv6 public address."
     exit 1
@@ -119,7 +124,8 @@ if [[ "${record_type}" = "AAAA" ]]; then
   fi
 elif [[ "${record_type}" = "A" ]]; then
   logger Info "Using IPv4, because A was set as record type."
-  cur_pub_addr=$(dig -4 ch TXT +short whoami.cloudflare @1.1.1.1 | awk -F '"' '{print $2}')
+#  cur_pub_addr=$(dig -4 ch TXT +short whoami.cloudflare @1.1.1.1 | awk -F '"' '{print $2}')
+  cur_pub_addr=$(curl -s4 https://ip.hetzner.com | grep -E '^([0-9]+(\.|$)){4}')
   if [[ "${cur_pub_addr}" = "" ]]; then
     logger Error "Apparently there is a problem in determining the public ip address."
     exit 1
@@ -133,11 +139,14 @@ fi
 
 # get record id if not given as parameter
 if [[ "${record_id}" = "" ]]; then
+#  record_zone=$(curl -s -w "\n%{http_code}" --location \
+#                 --request GET 'https://dns.hetzner.com/api/v1/records?zone_id='${zone_id} \
+#                 --header 'Auth-API-Token: '${auth_api_token})
   record_zone=$(curl -s -w "\n%{http_code}" --location \
-                 --request GET 'https://dns.hetzner.com/api/v1/records?zone_id='${zone_id} \
-                 --header 'Auth-API-Token: '${auth_api_token})
-
-  http_code=$(echo ${record_zone} | awk '{print $(NF)}')
+                 --request GET "https://api.hetzner.cloud/v1/zones/${zone_id}/rrsets/${record_name}/${record_type}" \
+                 --header "Authorization: Bearer ${auth_api_token}")
+#  http_code=$(echo ${record_zone} | awk '{print $(NF)}')
+  http_code=$(echo "${record_zone}" | tail -n 1 )
   if [[ "${http_code}" != "200" ]]; then
     logger Error "HTTP Response ${http_code} - Aborting run to prevent multipe records."
     exit 1
@@ -151,19 +160,34 @@ logger Info "Record_ID: ${record_id}"
 # create a new record
 if [[ "${record_id}" = "" ]]; then
   echo "DNS record \"${record_name}\" does not exists - will be created."
-  curl -s -X "POST" "https://dns.hetzner.com/api/v1/records" \
+#  curl -s -X "POST" "https://dns.hetzner.com/api/v1/records" \
+#       -H 'Content-Type: application/json' \
+#       -H 'Auth-API-Token: '${auth_api_token} \
+#       -d $'{
+#          "value": "'${cur_pub_addr}'",
+#          "ttl": '${record_ttl}',
+#          "type": "'${record_type}'",
+#          "name": "'${record_name}'",
+#          "zone_id": "'${zone_id}'"
+#        }'
+  creation_response=$(curl -s -X "POST" "https://api.hetzner.cloud/v1/zones/${zone_id}/rrsets" \
        -H 'Content-Type: application/json' \
-       -H 'Auth-API-Token: '${auth_api_token} \
+       -H 'Authorization: Bearer '${auth_api_token} \
        -d $'{
-          "value": "'${cur_pub_addr}'",
-          "ttl": '${record_ttl}',
-          "type": "'${record_type}'",
-          "name": "'${record_name}'",
-          "zone_id": "'${zone_id}'"
-        }'
+         "name": "'${record_name}'",
+         "type": "'${record_type}'",
+         "ttl": '${record_ttl}',
+         "records": [{
+           "value": "'${cur_pub_addr}'"
+         }],
+         "labels": {
+           "environment": "dyndns"
+         }
+       }')
 else
 # check if update is needed
-  cur_dyn_addr=`curl -s "https://dns.hetzner.com/api/v1/records/${record_id}" -H 'Auth-API-Token: '${auth_api_token} | jq --raw-output '.record.value'`
+#  cur_dyn_addr=`curl -s "https://dns.hetzner.com/api/v1/records/${record_id}" -H 'Auth-API-Token: '${auth_api_token} | jq --raw-output '.record.value'`
+  cur_dyn_addr=$(curl -s "https://api.hetzner.cloud/v1/zones/${zone_id}/rrsets/${record_name}/${record_type}" -H 'Authorization: Bearer '${auth_api_token} | jq --raw-output '.rrset.records[0].value')
 
   logger Info "Currently set IP address: ${cur_dyn_addr}"
 
@@ -175,16 +199,26 @@ else
     logger Info "DNS record \"${record_name}\" is no longer valid - updating record" 
     # update record
     if (( $(grep -c . <<<"${record_id}") == "1" )); then
-      curl -s -X "PUT" "https://dns.hetzner.com/api/v1/records/${record_id}" \
+#      curl -s -X "PUT" "https://dns.hetzner.com/api/v1/records/${record_id}" \
+#         -H 'Content-Type: application/json' \
+#         -H 'Auth-API-Token: '${auth_api_token} \
+#         -d $'{
+#           "value": "'${cur_pub_addr}'",
+#           "ttl": '${record_ttl}',
+#           "type": "'${record_type}'",
+#           "name": "'${record_name}'",
+#           "zone_id": "'${zone_id}'"
+#         }'
+    curl -s -X "POST" "https://api.hetzner.cloud/v1/zones/${zone_id}/rrsets/${record_name}/${record_type}/actions/update_records" \
          -H 'Content-Type: application/json' \
-         -H 'Auth-API-Token: '${auth_api_token} \
+         -H 'Authorization: Bearer '${auth_api_token} \
          -d $'{
-           "value": "'${cur_pub_addr}'",
-           "ttl": '${record_ttl}',
-           "type": "'${record_type}'",
-           "name": "'${record_name}'",
-           "zone_id": "'${zone_id}'"
-         }'
+            "records": [
+              {
+                "value": "'${cur_pub_addr}'"
+              }
+             ]
+           }'
       if [[ $? != 0 ]]; then
         logger Error "Unable to update record: \"${record_name}\""
       else
@@ -194,21 +228,45 @@ else
       logger Info "Retry delete/create instead of update"
       # delete records
       for r_id in ${record_id}; do
-        curl -s -X "DELETE" "https://dns.hetzner.com/api/v1/records/${r_id}" \
+#        curl -s -X "DELETE" "https://dns.hetzner.com/api/v1/records/${r_id}" \
+#             -H 'Content-Type: application/json' \
+#             -H 'Auth-API-Token: '${auth_api_token}
+        curl -s -X "POST" "https://api.hetzner.cloud/v1/zones/${zone_id}/rrsets/${record_name}/${record_type}/actions/remove_records" \
              -H 'Content-Type: application/json' \
-             -H 'Auth-API-Token: '${auth_api_token}
+             -H 'Authorization: Bearer '${auth_api_token} \
+             -d $'{
+                "records": [
+                  {
+                    "value": "'${cur_pub_addr}'"
+                  }
+                 ]
+               }'
       done
       # create record
-      curl -s -X "POST" "https://dns.hetzner.com/api/v1/records" \
+#      curl -s -X "POST" "https://dns.hetzner.com/api/v1/records" \
+#           -H 'Content-Type: application/json' \
+#           -H 'Auth-API-Token: '${auth_api_token} \
+#           -d $'{
+#             "value": "'${cur_pub_addr}'",
+#             "ttl": '${record_ttl}',
+#             "type": "'${record_type}'",
+#             "name": "'${record_name}'",
+#             "zone_id": "'${zone_id}'"
+#           }'
+      creation_response=$(curl -s -X "POST" "https://api.hetzner.cloud/v1/zones/${zone_id}/rrsets" \
            -H 'Content-Type: application/json' \
-           -H 'Auth-API-Token: '${auth_api_token} \
+           -H 'Authorization: Bearer '${auth_api_token} \
            -d $'{
-             "value": "'${cur_pub_addr}'",
-             "ttl": '${record_ttl}',
-             "type": "'${record_type}'",
              "name": "'${record_name}'",
-             "zone_id": "'${zone_id}'"
-           }'
+             "type": "'${record_type}'",
+             "ttl": '${record_ttl}',
+             "records": [{
+               "value": "'${cur_pub_addr}'"
+             }],
+             "labels": {
+               "environment": "dyndns"
+             }
+           }')
       if [[ $? != 0 ]]; then
         logger Error "Unable to recreate record: \"${record_name}\""
       else

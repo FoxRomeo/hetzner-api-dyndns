@@ -1,10 +1,11 @@
 # Hetzner API DynDNS
 
-A small script to dynamically update DNS records using the Hetzner DNS-API. Feel free to propose changes.
+A small script to dynamically update DNS records using the Hetzner Console-API. Feel free to propose changes.
 
-**Hetzner DNS API Doc:**
+**Hetzner API Doc:**
 
-https://dns.hetzner.com/api-docs/
+~~https://dns.hetzner.com/api-docs/~~
+https://docs.hetzner.cloud/reference/cloud#dns
 
 # Preparations
 
@@ -16,7 +17,7 @@ https://dns.hetzner.com/api-docs/
 - [`awk`](https://en.wikipedia.org/wiki/AWK): For example in the form of [gawk (Gnu Awk)](https://www.gnu.org/software/gawk/manual/gawk.html)
 
 ## Generate Access Token
-First, a new access token must be created in the [Hetzner DNS Console](https://dns.hetzner.com/). This should be copied immediately, because for security reasons it will not be possible to display the token later. But you can generate as many tokens as you like.
+To get started using the API you first need an API token. Sign in into the Hetzner Console choose a Project, go to Security → API Tokens, and generate a new token. Make sure to copy the token because it won’t be shown to you again.
 
 # Usage
 You store your Access Token either in the script or set it as an OS environment variable. To store it in the script replace `<your-hetzner-dns-api-token>` in the following line in the script.
