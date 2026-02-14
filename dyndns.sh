@@ -151,7 +151,7 @@ if [[ "${record_id}" = "" ]]; then
     logger Error "HTTP Response ${http_code} - Aborting run to prevent multipe records."
     exit 1
   else 
-    record_id=$(echo ${record_zone} | jq | sed '$d' | jq --raw-output '.records[] | select(.type == "'${record_type}'") | select(.name == "'${record_name}'") | .id')
+    record_id=$(echo ${record_zone} | jq . -M | sed '$d' | jq --raw-output '.records[] | select(.type == "'${record_type}'") | select(.name == "'${record_name}'") | .id')
   fi
 fi 
 
@@ -193,7 +193,7 @@ else
 
 # update existing record
   if [[ $cur_pub_addr == $cur_dyn_addr ]]; then
-    logger Info "DNS record \"${record_name}\" is up to date - nothing to to."
+    logger Info "DNS record \"${record_name}\" is up to date - nothing to do."
     exit 0
   else
     logger Info "DNS record \"${record_name}\" is no longer valid - updating record" 
