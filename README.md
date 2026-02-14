@@ -2,8 +2,10 @@
 
 A small script to dynamically update DNS records using the Hetzner DNS-API. Feel free to propose changes.
 
-**Hetzner DNS API Doc:**
+** The old API will be _discontinued_ My 2026 **
+Branch main will soon be (or is already) new-API only. Use old-api branch but remember you have a deadline.
 
+**Hetzner DNS API Doc:**
 https://dns.hetzner.com/api-docs/
 
 # Preparations
