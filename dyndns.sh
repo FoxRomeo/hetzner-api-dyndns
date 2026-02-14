@@ -1,7 +1,7 @@
 #!/bin/sh
 # DynDNS Script for Hetzner DNS API by FarrowStrange
 # modified by FoxRomeo
-# v1.3.1
+# Version: v1.3.1
 
 # get OS environment variables
 auth_api_token=${HETZNER_AUTH_API_TOKEN:-''}
@@ -150,10 +150,11 @@ if [[ "${record_id}" = "" ]]; then
   if [[ "${http_code}" != "200" ]]; then
     logger Error "HTTP Response ${http_code} - Aborting run to prevent multipe records."
     exit 1
-  else 
-    record_id=$(echo ${record_zone} | jq . -M | sed '$d' | jq --raw-output '.records[] | select(.type == "'${record_type}'") | select(.name == "'${record_name}'") | .id')
+  else
+#    record_id=$(echo ${record_zone} | jq . -M | sed '$d' | jq --raw-output '.records[] | select(.type == "'${record_type}'") | select(.name == "'${record_name}'") | .id')
+    record_id="${record_name}/${record_type
   fi
-fi 
+fi
 
 logger Info "Record_ID: ${record_id}"
 
