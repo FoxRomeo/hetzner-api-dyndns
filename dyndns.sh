@@ -191,6 +191,7 @@ else
            }'
       if [[ $? != 0 ]]; then
         logger Error "Unable to update record: \"${record_name}\""
+        exit 1
       else
         logger Info "DNS record \"${record_name}\" updated successfully"
       fi
