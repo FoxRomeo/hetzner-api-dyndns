@@ -2,12 +2,12 @@
 
 A small script to dynamically update DNS records using the Hetzner Console-API. Feel free to propose changes.
 
-**Hetzner Console-API Doc:**
-https://docs.hetzner.cloud/reference/cloud#dns
+**Hetzner Console-API Doc:**  
+  https://docs.hetzner.cloud/reference/cloud#dns
 
-~~https://dns.hetzner.com/api-docs/~~ Obsolete, disabled May 2026
-Branch main will is now the Console-API only. Use can use old-api branch but remember you have a deadline.
-When migrating to Console-API, remember you need to generate a new Token.
+~~https://dns.hetzner.com/api-docs/~~ Obsolete, disabled May 2026  
+  Branch main will is now the Console-API only. Use can use old-api branch but remember you have a deadline.  
+  When migrating to Console-API, remember you need to generate a new Token.
 
 # Preparations
 
@@ -22,9 +22,7 @@ To get started or when migrating to the Console-API you first need an API token.
 You store your Access Token either in the script or set it as an OS environment variable. To store it in the script replace `<your-hetzner-dns-api-token>` in the following line in the script.
 
 ```
-...
 auth_api_token=${HETZNER_AUTH_API_TOKEN:-'<your-hetzner-dns-api-token>'}
-...
 ```
 
 As soon as the token is deposited, the script can be called with the appropriate parameters. This allows several DynDNS records to be created in different zones. Optionally, the TTL and the record type can be specified. It is advisable to keep the TTL as low as possible, so that changed records are used as soon as possible.
