@@ -1,24 +1,22 @@
 # Hetzner API DynDNS
 
-A small script to dynamically update DNS records using the Hetzner DNS-API. Feel free to propose changes.
+A small script to dynamically update DNS records using the Hetzner Console-API. Feel free to propose changes.
 
-** The old API will be _discontinued_ My 2026 **
-Branch main will soon be (or is already) new-API only. Use old-api branch but remember you have a deadline.
+**Hetzner Console-API Doc:**
+https://docs.hetzner.cloud/reference/cloud#dns
 
-**Hetzner DNS API Doc:**
-https://dns.hetzner.com/api-docs/
+~~https://dns.hetzner.com/api-docs/~~ Obsolete, disabled May 2026
+Branch main will is now the Console-API only. Use can use old-api branch but remember you have a deadline.
+When migrating to Console-API, remember you need to generate a new Token.
 
 # Preparations
 
-## Install tools
-
+## Required tools
 - [`curl`](https://curl.se/)
-- [`dig`](https://gitlab.isc.org/isc-projects/bind9/-/tree/main/bin/dig) (part of [BIND9](https://gitlab.isc.org/isc-projects/bind9)): usually packaged as `dnsutils` or `bind-tools`
 - [`jq`](https://stedolan.github.io/jq/): [install](https://stedolan.github.io/jq/download/)
-- [`awk`](https://en.wikipedia.org/wiki/AWK): For example in the form of [gawk (Gnu Awk)](https://www.gnu.org/software/gawk/manual/gawk.html)
 
 ## Generate Access Token
-First, a new access token must be created in the [Hetzner DNS Console](https://dns.hetzner.com/). This should be copied immediately, because for security reasons it will not be possible to display the token later. But you can generate as many tokens as you like.
+To get started or when migrating to the Console-API you first need an API token. Sign in into the Hetzner Console choose a Project, go to Security → API Tokens, and generate a new token. Make sure to copy the token because it won’t be shown to you again.
 
 # Usage
 You store your Access Token either in the script or set it as an OS environment variable. To store it in the script replace `<your-hetzner-dns-api-token>` in the following line in the script.
@@ -98,29 +96,30 @@ example:
 ## Get all Zones
 If you want to get all zones in your account and check the desired zone ID.
 ```
-curl "https://dns.hetzner.com/api/v1/zones" -H \
-'Auth-API-Token: ${apitoken}' | jq
+curl "https://api.hetzner.cloud/v1/zones" \
+     --header 'Authorization: Bearer '${auth_api_token}) | jq
 ```
 ## Get a record ID
 If you want to get a record ID manually you may use the following curl command.
 ```
 curl -s --location \
-    --request GET 'https://dns.hetzner.com/api/v1/records?zone_id='${zone_id} \
-    --header 'Auth-API-Token: '${apitoken} | \
+    --request GET "https://api.hetzner.cloud/v1/zones/${zone_id}/rrsets/${record_name}/${record_type}" \
+    --header "Authorization: Bearer ${auth_api_token}") | \
     jq --raw-output '.records[] | select(.type == "'${record_type}'") | select(.name == "'{record_name}'") | .id'
 ```
 ## Add Record manually
 Use the previously obtained zone ID to create a dns record. 
 In the output you get the record ID. This is needed for the script and should therefore be noted.
 ```
-curl -X "POST" "https://dns.hetzner.com/api/v1/records" \
-     -H 'Content-Type: application/json' \
-     -H 'Auth-API-Token: ${apitoken}' \
-     -d $'{
-  "value": "${yourpublicip}",
-  "ttl": 60,
-  "type": "A",
-  "name": "dyn",
-  "zone_id": "${zoneID}"
-}'
+curl -s -X "POST" "https://api.hetzner.cloud/v1/zones/${zone_id}/rrsets/${record_name}/${record_type}/actions/set_records" \
+         -H 'Content-Type: application/json' \
+         -H 'Authorization: Bearer '${auth_api_token} \
+         -d $'{
+            "ttl": "'${ttl}'",
+            "records": [
+              {
+                "value": "'${cur_pub_addr}'"
+              }
+             ]
+           }'
 ```
