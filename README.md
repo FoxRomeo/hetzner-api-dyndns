@@ -3,9 +3,8 @@
 A small script to dynamically update DNS records using the Hetzner Console-API. Feel free to propose changes.
 
 **Hetzner Console-API Doc:**  
-  https://docs.hetzner.cloud/reference/cloud#dns
-
-~~https://dns.hetzner.com/api-docs/~~ Obsolete, disabled May 2026  
+- https://docs.hetzner.cloud/reference/cloud#dns
+- ~~https://dns.hetzner.com/api-docs/~~ Obsolete, disabled May 2026  
   Branch main will is now the Console-API only. Use can use old-api branch but remember you have a deadline.  
   When migrating to Console-API, remember you need to generate a new Token.
 
