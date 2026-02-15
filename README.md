@@ -6,6 +6,8 @@ A small script to dynamically update DNS records using the Hetzner Console-API. 
 https://docs.hetzner.cloud/reference/cloud#dns
 
 ~~https://dns.hetzner.com/api-docs/~~ Obsolete, disabled May 2026
+Branch main will is now  new-API only. Use can use old-api branch but remember you have a deadline.
+When migrating to Console-API, remember you need to generate a new Token.
 
 # Preparations
 
@@ -14,7 +16,7 @@ https://docs.hetzner.cloud/reference/cloud#dns
 - [`jq`](https://stedolan.github.io/jq/): [install](https://stedolan.github.io/jq/download/)
 
 ## Generate Access Token
-To get started using the API you first need an API token. Sign in into the Hetzner Console choose a Project, go to Security → API Tokens, and generate a new token. Make sure to copy the token because it won’t be shown to you again.
+To get started or when migrating to the Console-API you first need an API token. Sign in into the Hetzner Console choose a Project, go to Security → API Tokens, and generate a new token. Make sure to copy the token because it won’t be shown to you again.
 
 # Usage
 You store your Access Token either in the script or set it as an OS environment variable. To store it in the script replace `<your-hetzner-dns-api-token>` in the following line in the script.
