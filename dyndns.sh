@@ -1,6 +1,7 @@
 #!/bin/sh
 # DynDNS Script for Hetzner DNS API by FarrowStrange
 # modified by FoxRomeo
+# with code from pull requests by S4enL0ng, st3iny, nsty, and others
 # Version: v1.3.1
 
 # get OS environment variables
