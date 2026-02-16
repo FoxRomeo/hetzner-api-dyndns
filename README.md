@@ -67,9 +67,12 @@ You can use the following enviroment variables.
 # Docker container
 container available at:
 
-|ARM32v6 RPi:|<a href="https://hub.docker.com/r/intrepidde/arm32v6-hetzner-api-dyndns"><img src="https://img.shields.io/docker/pulls/intrepidde/arm32v6-hetzner-api-dyndns.svg?style=plastic&logo=appveyor" alt="Docker pulls arm32v6"/></a>|
-|ARM64v8:|<a href="https://hub.docker.com/r/intrepidde/arm64v8-hetzner-api-dyndns"><img src="https://img.shields.io/docker/pulls/intrepidde/arm64v8-hetzner-api-dyndns.svg?style=plastic&logo=appveyor" alt="Docker pulls arm32v8"/></a>|
-|x86/AMD64:|<a href="https://hub.docker.com/r/intrepidde/x86-hetzner-api-dyndns"><img src="https://img.shields.io/docker/pulls/intrepidde/x86-hetzner-api-dyndns.svg?style=plastic&logo=appveyor" alt="Docker pulls x86"/></a>|
+* ARM32v6 RPi:  
+  <a href="https://hub.docker.com/r/intrepidde/arm32v6-hetzner-api-dyndns"><img src="https://img.shields.io/docker/pulls/intrepidde/arm32v6-hetzner-api-dyndns.svg?style=plastic&logo=appveyor" alt="Docker pulls arm32v6"/></a>
+* ARM64v8:  
+  <a href="https://hub.docker.com/r/intrepidde/arm64v8-hetzner-api-dyndns"><img src="https://img.shields.io/docker/pulls/intrepidde/arm64v8-hetzner-api-dyndns.svg?style=plastic&logo=appveyor" alt="Docker pulls arm32v8"/></a>
+* x86/AMD64:  
+  <a href="https://hub.docker.com/r/intrepidde/x86-hetzner-api-dyndns"><img src="https://img.shields.io/docker/pulls/intrepidde/x86-hetzner-api-dyndns.svg?style=plastic&logo=appveyor" alt="Docker pulls x86"/></a>
 
 
 # Help
