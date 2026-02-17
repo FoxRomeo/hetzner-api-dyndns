@@ -60,7 +60,7 @@ while getopts ":z:Z:r:n:t:T:i:I:h" opt; do
     t  ) record_ttl="${OPTARG}";;
     T  ) record_type="${OPTARG}";;
     i  ) record_ip="${OPTARG}";;
-    I  ) record_ip_addr="${OPTARG}";;
+    I  ) record_ip_url="${OPTARG}";;
     h  ) display_help;;
     \? ) echo "Invalid option: -$OPTARG" >&2; exit 1;;
     :  ) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
@@ -195,7 +195,7 @@ else
   else
     logger Info "DNS record \"${record_name}\" is no longer valid - updating record"
     # update record
-    if (( $(grep -c . <<<"${record_id}") == "1" )); then
+    if [[ "${record_id}" != *$'\n'* && -n "${record_id}" ]]; then
       curl -s -X "POST" "https://api.hetzner.cloud/v1/zones/${zone_id}/rrsets/${record_name}/${record_type}/actions/set_records" \
          -H 'Content-Type: application/json' \
          -H 'Authorization: Bearer '${auth_api_token} \
