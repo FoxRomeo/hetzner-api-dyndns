@@ -13,6 +13,7 @@ zone_id=${HETZNER_ZONE_ID:-''}
 record_name=${HETZNER_RECORD_NAME:-''}
 record_ttl=${HETZNER_RECORD_TTL:-'60'}
 record_type=${HETZNER_RECORD_TYPE:-'A'}
+record_ip_url=${HETZNER_IP_URL:-'https://ip.hetzner.com'}
 record_ip=''
 
 display_help() {
@@ -121,7 +122,7 @@ if [[ "${record_type}" = "AAAA" ]]; then
     cur_pub_addr="${record_ip}"
     logger Info "Using IP address from parameter: ${cur_pub_addr}"
   else
-    cur_pub_addr=$(curl -s6 "${record_ip_addr}" | grep -E '^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}$')
+    cur_pub_addr=$(curl -s6 "${record_ip_url}" | grep -E '^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}$')
     if [[ "${cur_pub_addr}" = "" ]]; then
       logger Error "It seems you don't have a IPv6 public address or URL is invalid."
       exit 1
@@ -135,7 +136,7 @@ elif [[ "${record_type}" = "A" ]]; then
     cur_pub_addr="${record_ip}"
     logger Info "Using IP address from parameter: ${cur_pub_addr}"
   else
-    cur_pub_addr=$(curl -s4 "${record_ip_addr}" | grep -E '^([0-9]+(\.|$)){4}')
+    cur_pub_addr=$(curl -s4 "${record_ip_url}" | grep -E '^([0-9]+(\.|$)){4}')
     if [[ "${cur_pub_addr}" = "" ]]; then
       logger Error "Apparently there is a problem in determining the public ip address or URL is invalid"
       exit 1
