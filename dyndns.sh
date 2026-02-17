@@ -2,7 +2,7 @@
 # DynDNS Script for Hetzner DNS API by FarrowStrange
 # modified by FoxRomeo
 # with code from pull requests by S4enL0ng, st3iny, nsty, and others
-# Version: v1.3.1
+# Version: v1.3.2
 
 # get OS environment variables
 auth_api_token=${HETZNER_AUTH_API_TOKEN:-''}
