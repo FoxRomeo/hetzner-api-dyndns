@@ -66,7 +66,7 @@ done
 for cmd in curl jq; do
   if ! command -v "${cmd}" &> /dev/null; then
     logger Error "To run the script '${cmd}' is needed, but it seems not to be installed."
-    logger Error "Please check 'https://github.com/FarrowStrange/hetzner-api-dyndns#install-tools' for more informations and try again."
+    logger Error "Please check 'https://github.com/FoxRomeo/hetzner-api-dyndns#install-tools' for more informations and try again."
     exit 1
   fi
 done
